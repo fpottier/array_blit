@@ -52,6 +52,10 @@ let blit_mono (src : int array) dst =
     i := !i + 1
   done
 
+let blit_stdlib src dst =
+  let n = Array.length src in
+  Array.blit src 0 dst 0 n
+
 let benchmark_poly n =
   (* Initialization: *)
   let src, dst = init n, init n in
@@ -72,6 +76,16 @@ let benchmark_mono n =
   (* Dummy final read: *)
   sum dst n
 
+let benchmark_stdlib n =
+  (* Initialization: *)
+  let src, dst = init n, init n in
+  for _ = 1 to repetitions do
+    (* Benchmark: *)
+    blit_stdlib src dst;
+  done;
+  (* Dummy final read: *)
+  sum dst n
+
 (* -------------------------------------------------------------------------- *)
 
 (* Main. *)
@@ -79,15 +93,25 @@ let benchmark_mono n =
 let n =
   100_000
 
-let mono =
-  let mono = ref false in
+type setting =
+  | Mono
+  | Poly
+  | Stdlib
+
+let setting =
+  let setting = ref Mono in
   Arg.parse [
-    "--mono", Arg.Set mono, " Test monomorphic code.";
-  ] (fun _ -> ()) "Usage: main.exe [--mono]";
-  !mono
+    "--mono", Arg.Unit (fun () -> setting := Mono), " Test monomorphic code.";
+    "--poly", Arg.Unit (fun () -> setting := Poly), " Test polymorphic code.";
+    "--stdlib", Arg.Unit (fun () -> setting := Stdlib), " Test Array.blit.";
+  ] (fun _ -> ()) "Usage: main.exe [--mono | --poly | --stdlib]";
+  !setting
 
 let () =
-  if mono then
-    benchmark_mono n
-  else
-    benchmark_poly n
+  match setting with
+  | Mono ->
+      benchmark_mono n
+  | Poly ->
+      benchmark_poly n
+  | Stdlib ->
+      benchmark_stdlib n

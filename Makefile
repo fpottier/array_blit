@@ -14,19 +14,24 @@ MAIN := _build/default/main.exe
 .PHONY: test
 test: all
 	@ hyperfine -N --min-runs 30 --warmup 10 \
-	  -n "polymorphic array blit" "$(MAIN)" \
+	  -n "polymorphic array blit" "$(MAIN) --poly" \
 	  -n "monomorphic array blit" "$(MAIN) --mono" \
+	  -n "standard library Array.blit" "$(MAIN) --stdlib" \
 
 .PHONY: once
 once: all
 	@ echo
 	@ echo "## Running poly:"
 	@ echo
-	@ $(MAIN)
+	@ $(MAIN) --poly
 	@ echo
 	@ echo "## Running mono:"
 	@ echo
 	@ $(MAIN) --mono
+	@ echo
+	@ echo "## Running stdlib:"
+	@ echo
+	@ $(MAIN) --stdlib
 
 .PHONY: assembly
 assembly:
