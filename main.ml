@@ -56,6 +56,12 @@ let blit_stdlib src dst =
   let n = Array.length src in
   Array.blit src 0 dst 0 n
 
+external __blit : int array -> int array -> int -> unit = "hector_memcpy"
+
+let unsafe_blit src dst =
+  let n = Array.length src in
+  __blit src dst n
+
 let benchmark_poly n =
   (* Initialization: *)
   let src, dst = init n, init n in
@@ -86,6 +92,16 @@ let benchmark_stdlib n =
   (* Dummy final read: *)
   sum dst n
 
+let benchmark_unsafe n =
+  (* Initialization: *)
+  let src, dst = init n, init n in
+  for _ = 1 to repetitions do
+    (* Benchmark: *)
+    unsafe_blit src dst;
+  done;
+  (* Dummy final read: *)
+  sum dst n
+
 (* -------------------------------------------------------------------------- *)
 
 (* Main. *)
@@ -97,6 +113,7 @@ type setting =
   | Mono
   | Poly
   | Stdlib
+  | Unsafe
 
 let setting =
   let setting = ref Mono in
@@ -104,7 +121,8 @@ let setting =
     "--mono", Arg.Unit (fun () -> setting := Mono), " Test monomorphic code.";
     "--poly", Arg.Unit (fun () -> setting := Poly), " Test polymorphic code.";
     "--stdlib", Arg.Unit (fun () -> setting := Stdlib), " Test Array.blit.";
-  ] (fun _ -> ()) "Usage: main.exe [--mono | --poly | --stdlib]";
+    "--unsafe", Arg.Unit (fun () -> setting := Unsafe), " Test memcpy.";
+  ] (fun _ -> ()) "Usage: main.exe [--mono | --poly | --stdlib | --unsafe]";
   !setting
 
 let () =
@@ -115,3 +133,5 @@ let () =
       benchmark_poly n
   | Stdlib ->
       benchmark_stdlib n
+  | Unsafe ->
+      benchmark_unsafe n

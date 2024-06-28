@@ -17,6 +17,7 @@ test: all
 	  -n "polymorphic array blit" "$(MAIN) --poly" \
 	  -n "monomorphic array blit" "$(MAIN) --mono" \
 	  -n "standard library Array.blit" "$(MAIN) --stdlib" \
+	  -n "C library memcpy" "$(MAIN) --unsafe" \
 
 .PHONY: once
 once: all
@@ -32,6 +33,10 @@ once: all
 	@ echo "## Running stdlib:"
 	@ echo
 	@ $(MAIN) --stdlib
+	@ echo
+	@ echo "## Running unsafe:"
+	@ echo
+	@ $(MAIN) --unsafe
 
 .PHONY: assembly
 assembly:

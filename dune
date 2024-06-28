@@ -1,5 +1,6 @@
 (executable
   (public_name main)
+  (foreign_stubs (language c) (names memcpy))
   (libraries unix)
   (ocamlopt_flags -S)
 )
