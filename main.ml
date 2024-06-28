@@ -56,11 +56,12 @@ let blit_stdlib src dst =
   let n = Array.length src in
   Array.blit src 0 dst 0 n
 
-external __blit : int array -> int array -> int -> unit = "hector_memcpy"
-
-let unsafe_blit src dst =
-  let n = Array.length src in
-  __blit src dst n
+external unsafe_blit :
+  int array -> int ->
+  int array -> int ->
+  int ->
+  unit
+= "hector_array_blit"
 
 let benchmark_poly n =
   (* Initialization: *)
@@ -97,7 +98,7 @@ let benchmark_unsafe n =
   let src, dst = init n, init n in
   for _ = 1 to repetitions do
     (* Benchmark: *)
-    unsafe_blit src dst;
+    unsafe_blit src 0 dst 0 n;
   done;
   (* Dummy final read: *)
   sum dst n
